@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "name": "demo",
+  "image": {
+    "src": "assets/demo.jpg",
+    "naturalWidth": 1400,
+    "naturalHeight": 900
+  },
+  "hotspots": [
+    {
+      "id": "example1",
+      "x": 0.27,
+      "y": 0.57,
+      "label": "1",
+      "title": "Esempio testo",
+      "type": "text",
+      "value": "Metti qui un testo di spiegazione."
+    },
+    {
+      "id": "example2",
+      "x": 0.66,
+      "y": 0.57,
+      "label": "2",
+      "title": "Esempio PDF",
+      "type": "pdf",
+      "value": "assets/esempio.pdf"
+    }
+  ]
+}

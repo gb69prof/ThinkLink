@@ -1,0 +1,1079 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>ThingLink-Lite (offline + GitHub Pages)</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#0f1a30;
+      --card:#121f3a;
+      --text:#e9eefc;
+      --muted:#a8b3d6;
+      --accent:#6ee7ff;
+      --accent2:#a78bfa;
+      --danger:#ff6b6b;
+      --ok:#2ee59d;
+      --border:rgba(255,255,255,.10);
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --radius:18px;
+      --radius2:24px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; margin:0; font-family:var(--sans); background: radial-gradient(1200px 700px at 12% 8%, rgba(167,139,250,.18), transparent 55%),
+                                            radial-gradient(900px 600px at 88% 18%, rgba(110,231,255,.16), transparent 55%),
+                                            linear-gradient(180deg, #070b14, var(--bg)); color:var(--text); }
+    a{ color: var(--accent); }
+    .app{
+      height:100%;
+      display:grid;
+      grid-template-columns: 380px 1fr;
+      gap:14px;
+      padding:14px;
+    }
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-width: 320px;
+    }
+    .panel header{
+      padding:14px 14px 10px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(110,231,255,.10), rgba(255,255,255,.02));
+    }
+    .title{
+      display:flex; align-items:center; gap:10px;
+      font-weight:800; letter-spacing:.2px;
+    }
+    .badge{
+      font-size:12px; color:var(--muted);
+      padding:3px 10px; border:1px solid var(--border);
+      border-radius:999px; background: rgba(0,0,0,.18);
+    }
+    .subtitle{ color:var(--muted); font-size:12.5px; margin-top:6px; line-height:1.35; }
+    .panel .content{ padding:12px 14px 14px; overflow:auto; flex:1; }
+    .section{ margin: 12px 0; }
+    .section h3{ margin:0 0 8px; font-size:13px; color:#dfe6ff; letter-spacing:.2px; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+    .btn{
+      appearance:none; border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      border-radius: 12px;
+      padding:10px 12px;
+      font-weight:700;
+      cursor:pointer;
+      transition: transform .04s ease, background .2s ease, border-color .2s ease;
+      user-select:none;
+    }
+    .btn:hover{ background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.18); }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(110,231,255,.24), rgba(167,139,250,.20));
+      border-color: rgba(110,231,255,.30);
+    }
+    .btn.danger{ background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.35); }
+    .btn.ok{ background: rgba(46,229,157,.10); border-color: rgba(46,229,157,.35); }
+    .btn.small{ padding:7px 10px; font-size:12.5px; border-radius: 11px; }
+    .input, select, textarea{
+      width:100%;
+      padding:10px 11px;
+      border-radius: 12px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      outline:none;
+    }
+    textarea{ min-height:84px; resize: vertical; }
+    .hint{ color:var(--muted); font-size:12px; margin-top:7px; line-height:1.35; }
+    .kpi{
+      display:grid; grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    .tile{
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.14);
+      border-radius: 16px;
+      padding:10px 11px;
+    }
+    .tile .v{ font-weight:900; font-size:16px; }
+    .tile .l{ color:var(--muted); font-size:12px; margin-top:2px; }
+    .list{
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.12);
+      border-radius: 16px;
+      overflow:hidden;
+    }
+    .item{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+      padding:10px 11px;
+      border-top:1px solid var(--border);
+    }
+    .item:first-child{ border-top:0; }
+    .item .left{
+      display:flex; align-items:center; gap:10px; min-width:0;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(110,231,255,.15);
+      flex: 0 0 auto;
+    }
+    .name{
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      font-weight:800; font-size:13px;
+    }
+    .meta{ color:var(--muted); font-size:12px; }
+    .viewer{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+      display:flex;
+      flex-direction:column;
+    }
+    .viewer header{
+      padding:10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid var(--border);
+      background: rgba(0,0,0,.16);
+    }
+    .viewer header .left{ display:flex; gap:10px; align-items:center; min-width:0; }
+    .pill{
+      font-size:12px; color:var(--muted);
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.14);
+    }
+    .mode{
+      font-weight:900;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(110,231,255,.35);
+      background: rgba(110,231,255,.10);
+      color: #dff7ff;
+      font-size:12px;
+    }
+    .canvasWrap{
+      position:relative;
+      flex:1;
+      min-height: 280px;
+      background: radial-gradient(700px 380px at 40% 30%, rgba(110,231,255,.08), transparent 55%),
+                  radial-gradient(700px 420px at 60% 70%, rgba(167,139,250,.08), transparent 60%),
+                  rgba(0,0,0,.18);
+      touch-action: none; /* we handle gestures */
+      overflow:hidden;
+    }
+    .stage{
+      position:absolute;
+      left:50%; top:50%;
+      transform: translate(-50%,-50%);
+      transform-origin: center center;
+      will-change: transform;
+    }
+    .stage img{
+      display:block;
+      max-width:none;
+      user-select:none;
+      -webkit-user-drag:none;
+      border-radius: 18px;
+      box-shadow: 0 20px 70px rgba(0,0,0,.55);
+    }
+    .hotspot{
+      position:absolute;
+      width:28px; height:28px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.35);
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.85), rgba(110,231,255,.65) 38%, rgba(167,139,250,.55));
+      box-shadow: 0 0 0 6px rgba(110,231,255,.12), 0 12px 30px rgba(0,0,0,.35);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+      transform: translate(-50%,-50%);
+      transition: transform .08s ease;
+      user-select:none;
+    }
+    .hotspot:active{ transform: translate(-50%,-50%) scale(.96); }
+    .hotspot span{
+      font-size:12px; font-weight:900; color:#07111f;
+      text-shadow:none;
+    }
+    .drawer{
+      position:absolute;
+      right:14px;
+      top:58px;
+      width:min(420px, calc(100% - 28px));
+      max-height: calc(100% - 72px);
+      overflow:auto;
+      border-radius: 18px;
+      border:1px solid var(--border);
+      background: rgba(12,18,32,.92);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      padding:12px;
+      display:none;
+    }
+    .drawer.show{ display:block; }
+    .drawer h2{ margin:0 0 4px; font-size:16px; }
+    .drawer .t{ color:var(--muted); font-size:12px; margin-bottom:10px; }
+    .drawer .media{
+      border-radius: 16px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      overflow:hidden;
+      margin-top:10px;
+    }
+    .drawer iframe, .drawer video, .drawer audio, .drawer img{
+      width:100%;
+      display:block;
+    }
+    .drawer iframe{
+      height: 320px;
+      border:0;
+      background:#000;
+    }
+    .close{
+      float:right;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border-radius: 12px;
+      padding:7px 10px;
+      cursor:pointer;
+      font-weight:900;
+    }
+    .hr{ height:1px; background: var(--border); margin:12px 0; }
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      background: rgba(10,16,28,.92);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      display:none;
+      max-width: min(560px, calc(100% - 22px));
+      font-size: 13px;
+      line-height:1.35;
+      z-index: 9999;
+    }
+    .toast.show{ display:block; }
+    .kbd{
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.22);
+      color: #dfe6ff;
+    }
+    @media (max-width: 980px){
+      .app{ grid-template-columns: 1fr; }
+      .panel{ order: 2; }
+      .viewer{ order: 1; min-height: 55vh; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="panel" aria-label="Editor">
+    <header>
+      <div class="title">
+        ThingLink‑Lite
+        <span class="badge">offline · GitHub Pages</span>
+      </div>
+      <div class="subtitle">
+        Clicca sull’immagine per piazzare hotspot (in modalità <span class="kbd">Modifica</span>).
+        Esporta/importa il progetto in JSON. Funziona bene su iPad (pinch‑zoom e trascinamento).
+      </div>
+      <div class="kpi">
+        <div class="tile">
+          <div class="v" id="kpiHotspots">0</div>
+          <div class="l">Hotspot</div>
+        </div>
+        <div class="tile">
+          <div class="v" id="kpiMode">Modifica</div>
+          <div class="l">Modalità</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="section">
+        <h3>1) Immagine base</h3>
+        <div class="row">
+          <input class="input" type="file" id="imgFile" accept="image/*" />
+          <button class="btn small" id="btnSample">Carica demo</button>
+        </div>
+        <div class="hint">
+          Suggerimento: se pubblichi su GitHub Pages, metti le immagini in <span class="kbd">assets/</span> e usa un URL relativo.
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>2) Modalità</h3>
+        <div class="row">
+          <button class="btn primary" id="btnToggleMode">Passa a Visualizza</button>
+          <button class="btn" id="btnResetView">Centra / Reset zoom</button>
+        </div>
+        <div class="hint">In <b>Modifica</b> clicchi per creare hotspot. In <b>Visualizza</b> clicchi per aprirli.</div>
+      </div>
+
+      <div class="section">
+        <h3>3) Hotspot selezionato</h3>
+        <div id="selectedNone" class="hint">Nessun hotspot selezionato. Crea o clicca un hotspot per modificarlo.</div>
+        <div id="selectedEditor" style="display:none;">
+          <label class="hint" style="margin-top:0;">Titolo</label>
+          <input class="input" id="hsTitle" placeholder="Es. 'Porta dei Leoni'" />
+
+          <label class="hint">Tipo</label>
+          <select class="input" id="hsType">
+            <option value="text">Testo</option>
+            <option value="link">Link (URL)</option>
+            <option value="image">Immagine (URL)</option>
+            <option value="video">Video (URL)</option>
+            <option value="audio">Audio (URL)</option>
+            <option value="pdf">PDF (URL)</option>
+          </select>
+
+          <label class="hint">Contenuto</label>
+          <textarea id="hsValue" placeholder="Testo libero oppure un URL (https://... oppure assets/...)"></textarea>
+
+          <div class="row" style="margin-top:10px;">
+            <button class="btn ok" id="btnSaveHs">Salva</button>
+            <button class="btn danger" id="btnDeleteHs">Elimina</button>
+          </div>
+
+          <div class="hint">
+            Tip: per YouTube usa il link “embed”. Per PDF su GitHub Pages mettilo in assets/ e usa <span class="kbd">assets/nome.pdf</span>.
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>4) Salva / Carica</h3>
+        <div class="row">
+          <button class="btn" id="btnSaveLocal">Salva nel browser</button>
+          <button class="btn" id="btnLoadLocal">Carica dal browser</button>
+          <button class="btn" id="btnClearLocal">Svuota browser</button>
+        </div>
+        <div class="hr"></div>
+        <div class="row">
+          <button class="btn primary" id="btnExportJson">Esporta JSON</button>
+          <input class="input" type="file" id="importJson" accept="application/json" />
+        </div>
+        <div class="hint">JSON = portabile. Lo tieni come “progetto” dentro GitHub, lo ricarichi quando vuoi.</div>
+      </div>
+
+      <div class="section">
+        <h3>5) Pubblica</h3>
+        <div class="hint">
+          Per pubblicare: carica questa cartella su GitHub Pages e apri <span class="kbd">index.html</span>.
+          L’app è tutta in locale: niente server, niente dipendenze.
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="viewer" aria-label="Viewer">
+    <header>
+      <div class="left">
+        <div class="mode" id="modePill">MODIFICA</div>
+        <div class="pill" id="projectName">Progetto: non salvato</div>
+      </div>
+      <div class="row" style="gap:8px;">
+        <button class="btn small" id="btnZoomOut">−</button>
+        <button class="btn small" id="btnZoomIn">+</button>
+      </div>
+    </header>
+
+    <div class="canvasWrap" id="canvasWrap" aria-label="Area immagine interattiva">
+      <div class="stage" id="stage">
+        <img id="mainImg" alt="Immagine interattiva" />
+        <div id="hotspotsLayer"></div>
+      </div>
+
+      <div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Contenuto hotspot">
+        <button class="close" id="btnCloseDrawer">Chiudi ✕</button>
+        <h2 id="drawerTitle">Hotspot</h2>
+        <div class="t" id="drawerType">—</div>
+        <div id="drawerBody"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================
+   ThingLink-Lite
+   - hotspot su immagine
+   - editor + viewer
+   - pan/zoom (mouse + touch)
+   - export/import JSON
+   - salvataggio localStorage
+   ========================= */
+
+const $ = (s)=>document.querySelector(s);
+const imgFile = $("#imgFile");
+const mainImg = $("#mainImg");
+const stage = $("#stage");
+const hotspotsLayer = $("#hotspotsLayer");
+const canvasWrap = $("#canvasWrap");
+
+const modePill = $("#modePill");
+const btnToggleMode = $("#btnToggleMode");
+const btnResetView = $("#btnResetView");
+const btnZoomIn = $("#btnZoomIn");
+const btnZoomOut = $("#btnZoomOut");
+
+const kpiHotspots = $("#kpiHotspots");
+const kpiMode = $("#kpiMode");
+const projectName = $("#projectName");
+
+const selectedNone = $("#selectedNone");
+const selectedEditor = $("#selectedEditor");
+const hsTitle = $("#hsTitle");
+const hsType = $("#hsType");
+const hsValue = $("#hsValue");
+const btnSaveHs = $("#btnSaveHs");
+const btnDeleteHs = $("#btnDeleteHs");
+
+const btnExportJson = $("#btnExportJson");
+const importJson = $("#importJson");
+const btnSaveLocal = $("#btnSaveLocal");
+const btnLoadLocal = $("#btnLoadLocal");
+const btnClearLocal = $("#btnClearLocal");
+const btnSample = $("#btnSample");
+
+const drawer = $("#drawer");
+const drawerTitle = $("#drawerTitle");
+const drawerType = $("#drawerType");
+const drawerBody = $("#drawerBody");
+const btnCloseDrawer = $("#btnCloseDrawer");
+
+const toast = $("#toast");
+
+// --- State
+let state = {
+  version: 1,
+  name: "non salvato",
+  image: {
+    // src: dataURL or relative URL
+    src: "",
+    naturalWidth: 0,
+    naturalHeight: 0
+  },
+  hotspots: [],
+  ui: {
+    mode: "edit", // edit | view
+    selectedId: null
+  }
+};
+
+// --- Utilities
+function uid(){
+  return Math.random().toString(16).slice(2) + Date.now().toString(16);
+}
+function clamp(v,min,max){ return Math.max(min, Math.min(max,v)); }
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>toast.classList.remove("show"), 2200);
+}
+
+// --- Pan/Zoom model (stage transform)
+let view = {
+  scale: 1,
+  tx: 0,
+  ty: 0,
+  minScale: 0.2,
+  maxScale: 6
+};
+
+function applyTransform(){
+  stage.style.transform = `translate(calc(-50% + ${view.tx}px), calc(-50% + ${view.ty}px)) scale(${view.scale})`;
+}
+function resetView(){
+  view.scale = 1;
+  view.tx = 0;
+  view.ty = 0;
+  applyTransform();
+}
+function zoomAt(factor, cx, cy){
+  const oldScale = view.scale;
+  const newScale = clamp(oldScale * factor, view.minScale, view.maxScale);
+  factor = newScale / oldScale;
+
+  // Keep point under cursor fixed:
+  // Convert cursor to stage-centered coordinates
+  const rect = canvasWrap.getBoundingClientRect();
+  const x = cx - (rect.left + rect.width/2) - view.tx;
+  const y = cy - (rect.top + rect.height/2) - view.ty;
+
+  view.tx += x - x * factor;
+  view.ty += y - y * factor;
+  view.scale = newScale;
+  applyTransform();
+}
+btnZoomIn.addEventListener("click", ()=>{
+  const rect = canvasWrap.getBoundingClientRect();
+  zoomAt(1.15, rect.left + rect.width/2, rect.top + rect.height/2);
+});
+btnZoomOut.addEventListener("click", ()=>{
+  const rect = canvasWrap.getBoundingClientRect();
+  zoomAt(1/1.15, rect.left + rect.width/2, rect.top + rect.height/2);
+});
+btnResetView.addEventListener("click", resetView);
+
+// Wheel zoom (desktop)
+canvasWrap.addEventListener("wheel", (e)=>{
+  e.preventDefault();
+  const factor = (e.deltaY < 0) ? 1.10 : 1/1.10;
+  zoomAt(factor, e.clientX, e.clientY);
+}, { passive:false });
+
+// Pointer gestures (pan + pinch)
+const pointers = new Map();
+let lastPan = null;
+let lastPinch = null;
+
+canvasWrap.addEventListener("pointerdown", (e)=>{
+  canvasWrap.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  if(pointers.size === 1){
+    lastPan = {x:e.clientX, y:e.clientY};
+  }
+  if(pointers.size === 2){
+    const pts = [...pointers.values()];
+    lastPinch = {
+      dist: Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y),
+      mid: {x:(pts[0].x+pts[1].x)/2, y:(pts[0].y+pts[1].y)/2}
+    };
+  }
+});
+
+canvasWrap.addEventListener("pointermove", (e)=>{
+  if(!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+
+  if(pointers.size === 1){
+    // pan
+    const p = pointers.get(e.pointerId);
+    if(!lastPan) lastPan = {x:p.x, y:p.y};
+    const dx = p.x - lastPan.x;
+    const dy = p.y - lastPan.y;
+    view.tx += dx;
+    view.ty += dy;
+    lastPan = {x:p.x, y:p.y};
+    applyTransform();
+  } else if(pointers.size === 2){
+    const pts = [...pointers.values()];
+    const dist = Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
+    const mid = {x:(pts[0].x+pts[1].x)/2, y:(pts[0].y+pts[1].y)/2};
+    if(lastPinch){
+      const factor = dist / lastPinch.dist;
+      zoomAt(factor, mid.x, mid.y);
+    }
+    lastPinch = {dist, mid};
+  }
+});
+
+function endPointer(e){
+  pointers.delete(e.pointerId);
+  if(pointers.size === 0){
+    lastPan = null;
+    lastPinch = null;
+  }
+  if(pointers.size === 1){
+    const only = [...pointers.values()][0];
+    lastPan = {x:only.x, y:only.y};
+    lastPinch = null;
+  }
+}
+canvasWrap.addEventListener("pointerup", endPointer);
+canvasWrap.addEventListener("pointercancel", endPointer);
+
+// --- Hotspots rendering
+function renderHotspots(){
+  hotspotsLayer.innerHTML = "";
+  for(const hs of state.hotspots){
+    const el = document.createElement("div");
+    el.className = "hotspot";
+    el.style.left = (hs.x * state.image.naturalWidth) + "px";
+    el.style.top = (hs.y * state.image.naturalHeight) + "px";
+    el.dataset.id = hs.id;
+    el.title = hs.title || "Hotspot";
+    const n = document.createElement("span");
+    n.textContent = hs.label || "i";
+    el.appendChild(n);
+
+    el.addEventListener("click", (ev)=>{
+      ev.stopPropagation();
+      if(state.ui.mode === "edit"){
+        selectHotspot(hs.id);
+      } else {
+        openHotspot(hs.id);
+      }
+    });
+
+    hotspotsLayer.appendChild(el);
+  }
+  kpiHotspots.textContent = state.hotspots.length;
+}
+
+// --- Selection + editor
+function selectHotspot(id){
+  state.ui.selectedId = id;
+  const hs = state.hotspots.find(h=>h.id===id);
+  if(!hs){
+    selectedNone.style.display = "block";
+    selectedEditor.style.display = "none";
+    return;
+  }
+  selectedNone.style.display = "none";
+  selectedEditor.style.display = "block";
+  hsTitle.value = hs.title || "";
+  hsType.value = hs.type || "text";
+  hsValue.value = hs.value || "";
+}
+function clearSelection(){
+  state.ui.selectedId = null;
+  selectedNone.style.display = "block";
+  selectedEditor.style.display = "none";
+}
+
+// --- Drawer (viewer)
+function openHotspot(id){
+  const hs = state.hotspots.find(h=>h.id===id);
+  if(!hs) return;
+  drawerTitle.textContent = hs.title || "Hotspot";
+  drawerType.textContent = (hs.type || "text").toUpperCase();
+  drawerBody.innerHTML = "";
+
+  const type = hs.type || "text";
+  const val = (hs.value || "").trim();
+
+  if(type === "text"){
+    const p = document.createElement("div");
+    p.style.whiteSpace = "pre-wrap";
+    p.style.lineHeight = "1.5";
+    p.textContent = val || "(vuoto)";
+    drawerBody.appendChild(p);
+  } else if(type === "link"){
+    const a = document.createElement("a");
+    a.href = val;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.textContent = val || "(URL vuoto)";
+    drawerBody.appendChild(a);
+  } else if(type === "image"){
+    const box = document.createElement("div");
+    box.className = "media";
+    const im = document.createElement("img");
+    im.src = val;
+    im.alt = hs.title || "immagine";
+    box.appendChild(im);
+    drawerBody.appendChild(box);
+  } else if(type === "video"){
+    const box = document.createElement("div");
+    box.className = "media";
+    // Heuristic: if "youtube.com/embed" or "player.vimeo.com" => iframe, else video tag
+    if(/youtube\.com\/embed|youtu\.be|player\.vimeo\.com/.test(val)){
+      const ifr = document.createElement("iframe");
+      ifr.src = val.includes("embed") ? val : val;
+      ifr.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+      ifr.allowFullscreen = true;
+      box.appendChild(ifr);
+    } else {
+      const v = document.createElement("video");
+      v.src = val;
+      v.controls = true;
+      v.playsInline = true;
+      box.appendChild(v);
+    }
+    drawerBody.appendChild(box);
+  } else if(type === "audio"){
+    const box = document.createElement("div");
+    box.className = "media";
+    const a = document.createElement("audio");
+    a.src = val;
+    a.controls = true;
+    box.appendChild(a);
+    drawerBody.appendChild(box);
+  } else if(type === "pdf"){
+    const box = document.createElement("div");
+    box.className = "media";
+    const ifr = document.createElement("iframe");
+    ifr.src = val;
+    box.appendChild(ifr);
+    drawerBody.appendChild(box);
+    const dl = document.createElement("div");
+    dl.style.marginTop = "10px";
+    dl.innerHTML = `Se non vedi il PDF, <a href="${val}" target="_blank" rel="noopener">aprilo in una nuova scheda</a>.`;
+    drawerBody.appendChild(dl);
+  }
+
+  drawer.classList.add("show");
+}
+function closeDrawer(){
+  drawer.classList.remove("show");
+  drawerBody.innerHTML = "";
+}
+btnCloseDrawer.addEventListener("click", closeDrawer);
+canvasWrap.addEventListener("click", ()=>{
+  if(state.ui.mode === "view") closeDrawer();
+});
+
+// --- Mode
+function setMode(mode){
+  state.ui.mode = mode;
+  const isEdit = mode === "edit";
+  modePill.textContent = isEdit ? "MODIFICA" : "VISUALIZZA";
+  kpiMode.textContent = isEdit ? "Modifica" : "Visualizza";
+  btnToggleMode.textContent = isEdit ? "Passa a Visualizza" : "Passa a Modifica";
+  if(!isEdit) clearSelection();
+  closeDrawer();
+}
+btnToggleMode.addEventListener("click", ()=>{
+  setMode(state.ui.mode === "edit" ? "view" : "edit");
+});
+
+// --- Create hotspot on click (edit mode)
+function clientToImageCoords(clientX, clientY){
+  // Convert client point to image coordinate (natural pixels), then normalize [0..1]
+  const rect = canvasWrap.getBoundingClientRect();
+  const cx = clientX - (rect.left + rect.width/2);
+  const cy = clientY - (rect.top + rect.height/2);
+
+  // Undo stage translate/scale:
+  const xStage = (cx - view.tx) / view.scale;
+  const yStage = (cy - view.ty) / view.scale;
+
+  // Stage is centered at image center, so image origin is (-w/2, -h/2)
+  const w = state.image.naturalWidth;
+  const h = state.image.naturalHeight;
+  const xImg = xStage + w/2;
+  const yImg = yStage + h/2;
+
+  const nx = clamp(xImg / w, 0, 1);
+  const ny = clamp(yImg / h, 0, 1);
+  return {nx, ny};
+}
+
+hotspotsLayer.addEventListener("click", (e)=>e.stopPropagation());
+
+canvasWrap.addEventListener("dblclick", (e)=>{
+  // Desktop shortcut: double click to add hotspot in edit mode
+  if(state.ui.mode !== "edit") return;
+  if(!state.image.src) return;
+  const {nx, ny} = clientToImageCoords(e.clientX, e.clientY);
+  const hs = {
+    id: uid(),
+    x: nx,
+    y: ny,
+    label: String(state.hotspots.length + 1),
+    title: "Nuovo hotspot",
+    type: "text",
+    value: ""
+  };
+  state.hotspots.push(hs);
+  renderHotspots();
+  selectHotspot(hs.id);
+  showToast("Hotspot creato (doppio click).");
+});
+
+// Single tap/click in edit mode: add if you click on empty space
+canvasWrap.addEventListener("click", (e)=>{
+  if(state.ui.mode !== "edit") return;
+  if(!state.image.src) return;
+
+  // avoid adding when clicking UI overlay
+  if(drawer.classList.contains("show")) return;
+
+  // Add only if click isn't "drag-like": handled naturally
+  // We'll create hotspot with longpress on touch? Simpler: single click adds, but that can annoy while panning.
+  // So: single click adds only if shift key on desktop OR if viewport is relatively stable and no pointers move.
+  if(!e.shiftKey && matchMedia("(pointer:fine)").matches){
+    showToast("Per aggiungere con mouse: fai doppio click oppure tieni premuto SHIFT e clicca.");
+    return;
+  }
+
+  const {nx, ny} = clientToImageCoords(e.clientX, e.clientY);
+  const hs = {
+    id: uid(),
+    x: nx,
+    y: ny,
+    label: String(state.hotspots.length + 1),
+    title: "Nuovo hotspot",
+    type: "text",
+    value: ""
+  };
+  state.hotspots.push(hs);
+  renderHotspots();
+  selectHotspot(hs.id);
+  showToast("Hotspot creato.");
+});
+
+// Touch long-press to add (iPad friendly)
+let longPressTimer = null;
+canvasWrap.addEventListener("pointerdown", (e)=>{
+  if(state.ui.mode !== "edit") return;
+  if(!state.image.src) return;
+  if(e.pointerType !== "touch") return;
+
+  const startX = e.clientX, startY = e.clientY;
+  const startTx = view.tx, startTy = view.ty;
+  clearTimeout(longPressTimer);
+  longPressTimer = setTimeout(()=>{
+    // if panned significantly, don't add
+    const moved = Math.hypot(view.tx - startTx, view.ty - startTy);
+    if(moved > 12) return;
+    const {nx, ny} = clientToImageCoords(startX, startY);
+    const hs = {
+      id: uid(),
+      x: nx,
+      y: ny,
+      label: String(state.hotspots.length + 1),
+      title: "Nuovo hotspot",
+      type: "text",
+      value: ""
+    };
+    state.hotspots.push(hs);
+    renderHotspots();
+    selectHotspot(hs.id);
+    showToast("Hotspot creato (pressione prolungata).");
+  }, 520);
+});
+canvasWrap.addEventListener("pointerup", ()=>clearTimeout(longPressTimer));
+canvasWrap.addEventListener("pointercancel", ()=>clearTimeout(longPressTimer));
+canvasWrap.addEventListener("pointermove", ()=>clearTimeout(longPressTimer));
+
+// --- Save / delete selected hotspot
+btnSaveHs.addEventListener("click", ()=>{
+  const id = state.ui.selectedId;
+  const hs = state.hotspots.find(h=>h.id===id);
+  if(!hs){ showToast("Nessun hotspot selezionato."); return; }
+  hs.title = hsTitle.value.trim() || "Hotspot";
+  hs.type = hsType.value;
+  hs.value = hsValue.value;
+  renderHotspots();
+  showToast("Hotspot salvato.");
+});
+btnDeleteHs.addEventListener("click", ()=>{
+  const id = state.ui.selectedId;
+  if(!id){ showToast("Nessun hotspot selezionato."); return; }
+  const i = state.hotspots.findIndex(h=>h.id===id);
+  if(i>=0){
+    state.hotspots.splice(i,1);
+    // re-label
+    state.hotspots.forEach((h, idx)=>h.label = String(idx+1));
+    renderHotspots();
+    clearSelection();
+    showToast("Hotspot eliminato.");
+  }
+});
+
+// --- Image loading
+function setImageSrc(src){
+  return new Promise((resolve, reject)=>{
+    mainImg.onload = ()=>{
+      state.image.src = src;
+      state.image.naturalWidth = mainImg.naturalWidth;
+      state.image.naturalHeight = mainImg.naturalHeight;
+      // size stage at natural pixels
+      mainImg.style.width = state.image.naturalWidth + "px";
+      mainImg.style.height = state.image.naturalHeight + "px";
+      // also ensure hotspots layer matches
+      hotspotsLayer.style.position = "absolute";
+      hotspotsLayer.style.left = "0";
+      hotspotsLayer.style.top = "0";
+      hotspotsLayer.style.width = state.image.naturalWidth + "px";
+      hotspotsLayer.style.height = state.image.naturalHeight + "px";
+      resetView();
+      renderHotspots();
+      resolve();
+    };
+    mainImg.onerror = ()=>reject(new Error("Impossibile caricare l'immagine."));
+    mainImg.src = src;
+  });
+}
+
+imgFile.addEventListener("change", async ()=>{
+  const f = imgFile.files && imgFile.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = async ()=>{
+    try{
+      state.hotspots = [];
+      clearSelection();
+      await setImageSrc(reader.result);
+      state.name = f.name.replace(/\.[^.]+$/,"");
+      projectName.textContent = "Progetto: " + state.name;
+      showToast("Immagine caricata. Aggiungi hotspot.");
+    }catch(err){
+      alert(err.message);
+    }
+  };
+  reader.readAsDataURL(f);
+});
+
+// --- Sample demo (tiny SVG)
+btnSample.addEventListener("click", async ()=>{
+  const demo = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+  <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900">
+    <defs>
+      <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0" stop-color="#0ea5e9" stop-opacity=".35"/>
+        <stop offset="1" stop-color="#a78bfa" stop-opacity=".35"/>
+      </linearGradient>
+      <filter id="s" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="18" stdDeviation="18" flood-opacity=".45"/>
+      </filter>
+    </defs>
+    <rect width="100%" height="100%" fill="#0b1220"/>
+    <circle cx="260" cy="200" r="240" fill="url(#g)"/>
+    <circle cx="1180" cy="260" r="280" fill="url(#g)"/>
+    <rect x="160" y="150" width="1080" height="600" rx="26" fill="#111b33" stroke="rgba(255,255,255,.14)" filter="url(#s)"/>
+    <text x="220" y="260" fill="#e9eefc" font-size="52" font-family="system-ui" font-weight="800">Demo: Immagine interattiva</text>
+    <text x="220" y="330" fill="#a8b3d6" font-size="26" font-family="system-ui">Pinch-zoom, trascina, aggiungi hotspot.</text>
+    <text x="220" y="400" fill="#a8b3d6" font-size="22" font-family="system-ui">iPad: pressione prolungata per creare.</text>
+    <rect x="220" y="450" width="360" height="210" rx="18" fill="rgba(110,231,255,.10)" stroke="rgba(110,231,255,.35)"/>
+    <text x="250" y="520" fill="#dff7ff" font-size="22" font-family="system-ui" font-weight="700">Hotspot 1</text>
+    <text x="250" y="560" fill="#a8b3d6" font-size="18" font-family="system-ui">Testo / link / media</text>
+    <rect x="620" y="450" width="520" height="210" rx="18" fill="rgba(167,139,250,.10)" stroke="rgba(167,139,250,.35)"/>
+    <text x="650" y="520" fill="#efeaff" font-size="22" font-family="system-ui" font-weight="700">Hotspot 2</text>
+    <text x="650" y="560" fill="#a8b3d6" font-size="18" font-family="system-ui">Video / PDF / audio</text>
+  </svg>`)}`
+  state.hotspots = [
+    {id: uid(), x: 0.27, y: 0.57, label:"1", title:"Esempio testo", type:"text", value:"Questo è un hotspot di testo.\n\nIn modalità Visualizza, cliccami per aprire il pannello."},
+    {id: uid(), x: 0.66, y: 0.57, label:"2", title:"Esempio link", type:"link", value:"https://example.com"}
+  ];
+  clearSelection();
+  await setImageSrc(demo);
+  state.name = "demo";
+  projectName.textContent = "Progetto: demo";
+  showToast("Demo caricata.");
+});
+
+// --- Export / Import JSON
+function download(filename, content, mime){
+  const blob = new Blob([content], {type: mime || "text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+btnExportJson.addEventListener("click", ()=>{
+  if(!state.image.src){
+    showToast("Carica prima un'immagine.");
+    return;
+  }
+  const payload = {
+    version: state.version,
+    name: state.name,
+    image: state.image,
+    hotspots: state.hotspots
+  };
+  download(`${state.name || "progetto"}.json`, JSON.stringify(payload, null, 2), "application/json");
+  showToast("JSON esportato.");
+});
+
+importJson.addEventListener("change", async ()=>{
+  const f = importJson.files && importJson.files[0];
+  if(!f) return;
+  try{
+    const text = await f.text();
+    const payload = JSON.parse(text);
+    if(!payload || !payload.image || !payload.image.src){
+      throw new Error("JSON non valido: manca image.src");
+    }
+    state.name = payload.name || "progetto";
+    state.image = payload.image;
+    state.hotspots = Array.isArray(payload.hotspots) ? payload.hotspots : [];
+    // Ensure labels
+    state.hotspots.forEach((h, i)=>{ if(!h.label) h.label = String(i+1); });
+    clearSelection();
+    await setImageSrc(state.image.src);
+    projectName.textContent = "Progetto: " + state.name;
+    showToast("JSON importato.");
+  }catch(err){
+    alert("Import fallito: " + err.message);
+  }finally{
+    importJson.value = "";
+  }
+});
+
+// --- LocalStorage
+const LS_KEY = "thinglink_lite_project_v1";
+btnSaveLocal.addEventListener("click", ()=>{
+  if(!state.image.src){
+    showToast("Carica prima un'immagine.");
+    return;
+  }
+  const payload = {
+    version: state.version,
+    name: state.name,
+    image: state.image,
+    hotspots: state.hotspots
+  };
+  localStorage.setItem(LS_KEY, JSON.stringify(payload));
+  projectName.textContent = "Progetto: " + state.name + " (browser)";
+  showToast("Salvato nel browser.");
+});
+btnLoadLocal.addEventListener("click", async ()=>{
+  const raw = localStorage.getItem(LS_KEY);
+  if(!raw){ showToast("Nessun progetto nel browser."); return; }
+  try{
+    const payload = JSON.parse(raw);
+    state.name = payload.name || "progetto";
+    state.image = payload.image;
+    state.hotspots = payload.hotspots || [];
+    clearSelection();
+    await setImageSrc(state.image.src);
+    projectName.textContent = "Progetto: " + state.name + " (browser)";
+    showToast("Caricato dal browser.");
+  }catch(err){
+    alert("Caricamento fallito: " + err.message);
+  }
+});
+btnClearLocal.addEventListener("click", ()=>{
+  localStorage.removeItem(LS_KEY);
+  showToast("Browser svuotato.");
+});
+
+// --- Init
+(function init(){
+  setMode("edit");
+  clearSelection();
+  resetView();
+  projectName.textContent = "Progetto: non salvato";
+  showToast("Pronto. Carica un'immagine oppure 'Carica demo'.");
+})();
+</script>
+</body>
+</html>
